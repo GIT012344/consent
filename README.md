@@ -1,161 +1,98 @@
-# Consent Management System - Frontend
+# Multi-Tenant Consent Management System
 
-ระบบจัดการความยินยอมในการใช้ข้อมูลส่วนบุคคล (PDPA Compliance)
+## Installation
 
-## 🚀 Features
-
-- **ให้ความยินยอม**: ฟอร์มสำหรับกรอกข้อมูลและให้ความยินยอม
-- **ตรวจสอบข้อมูล**: ค้นหาและตรวจสอบสถานะความยินยอม
-- **จัดการข้อมูล**: Dashboard สำหรับผู้ดูแลระบบ
-- **Export ข้อมูล**: Export เป็น Excel และ CSV
-- **Responsive Design**: รองรับทุกขนาดหน้าจอ
-- **Multi-language**: รองรับภาษาไทยและอังกฤษ
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React 18, React Router DOM
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **HTTP Client**: Axios
-- **Build Tool**: Create React App
-
-## 📦 Installation
-
-### 1. ติดตั้ง Dependencies
+### Backend Setup
 ```bash
+cd backend
+npm install express cors body-parser dotenv
+node server-complete.js
+```
+Backend runs on: http://localhost:4000
+
+### Frontend Setup
+```bash
+# In root directory
 npm install
-```
-
-### 2. ตั้งค่า Environment Variables (Optional)
-สร้างไฟล์ `.env` ในโฟลเดอร์ root:
-```env
-REACT_APP_API_URL=http://localhost:3000/api
-```
-
-### 3. รันแอปพลิเคชัน
-```bash
-# Development mode
 npm start
+```
+Frontend runs on: http://localhost:3001
 
-# Build for production
-npm run build
+## Access URLs
+- **User Consent Page**: http://localhost:3001/#/user
+- **Admin Panel**: http://localhost:3001/#/admin
+- **Tenant-specific**: http://localhost:3001/#/default/consent
+
+## Features
+
+### User Consent Flow (5 Steps)
+- **Step A**: Audience Selection (auto-skip if single audience)
+- **Step B**: Language Selection (TH/EN)
+- **Step C**: Policy Content Display with version badges
+- **Step D**: User Information Form
+- **Step E**: Success Confirmation
+
+### Admin Features
+- Create/Clone/Deactivate policy versions
+- Multi-tenant support
+- Audience targeting
+- Export to CSV
+- Version duplicate prevention
+
+### Validation
+- Thai ID: 13 digits with checksum validation
+- Passport: [A-Z0-9]{6,12}
+- Required consent checkbox
+- Effective date range validation
+
+### Security
+- ID hashing with salt (SHA256)
+- Only last 4 digits stored in plain
+- IP address and user agent tracking
+- Snapshot HTML capture
+- Rate limiting on consent submission
+
+## API Endpoints
+
+### User APIs
+- `GET /api/tenant/:tenant/config` - Get tenant configuration
+- `POST /api/consent/version` - Get active policy version
+- `POST /api/consent/accept` - Submit consent
+
+### Admin APIs
+- `GET /admin/policy_versions` - List all versions
+- `POST /admin/policy_versions` - Create new version
+- `PUT /admin/policy_versions/:id/deactivate` - Deactivate version
+- `GET /admin/report` - Get consent report
+- `GET /admin/export/csv` - Export CSV
+
+## Database Schema
+Run migration: `backend/migrations/complete-schema.sql`
+
+Tables:
+- tenants
+- policy_kinds
+- policies
+- audiences
+- policy_versions
+- policy_version_audiences
+- user_consents
+
+## Environment Variables
+Copy `backend/.env.example` to `backend/.env` and configure:
+```
+PORT=4000
+ID_HASH_SALT=change-this-salt-in-production
 ```
 
-แอปพลิเคชันจะรันที่: http://localhost:3001
+## Test Data
+Default tenant with privacy policy in TH/EN for customer, staff, admin audiences.
 
-## 🔗 Backend Integration
+## Version Selection Logic
+1. Filter by tenant, kind, audience, active status
+2. Match exact language first
+3. Fallback to tenant default language
+4. Sort by effective_from DESC, version DESC
 
-แอปพลิเคชันนี้เชื่อมต่อกับ Backend API ที่รันอยู่ที่ `http://localhost:3000`
-
-### API Endpoints ที่ใช้:
-- `POST /api/consent/submit` - ส่งข้อมูลความยินยอม
-- `GET /api/consent/check/:id` - ตรวจสอบข้อมูลความยินยอม
-- `GET /api/consent/list` - ดึงรายการข้อมูลทั้งหมด (Admin)
-- `GET /api/consent/stats` - สถิติข้อมูล
-- `GET /api/export/excel` - Export Excel
-- `GET /api/export/csv` - Export CSV
-
-## 📱 Pages
-
-### 1. หน้าให้ความยินยอม (`/`)
-- ฟอร์มกรอกข้อมูลส่วนบุคคล
-- ตรวจสอบข้อมูลซ้ำอัตโนมัติ
-- แสดงข้อความความยินยอมตามภาษาที่เลือก
-- Validation ข้อมูลครบถ้วน
-
-### 2. หน้าตรวจสอบข้อมูล (`/check`)
-- ค้นหาด้วยเลขบัตรประชาชน/Passport
-- แสดงรายละเอียดความยินยอม
-- ข้อมูลการติดต่อสำหรับถอนความยินยอม
-
-### 3. หน้าจัดการข้อมูล (`/admin`)
-- Dashboard สำหรับผู้ดูแลระบบ
-- สถิติและกราฟข้อมูล
-- ตัวกรองและค้นหาข้อมูล
-- Export ข้อมูลเป็น Excel/CSV
-- Pagination สำหรับข้อมูลจำนวนมาก
-
-## 🎨 UI/UX Features
-
-- **Modern Design**: ใช้ Tailwind CSS สำหรับ UI ที่สวยงาม
-- **Responsive**: รองรับ Mobile, Tablet, Desktop
-- **Accessibility**: ปฏิบัติตาม Web Accessibility Guidelines
-- **Loading States**: แสดงสถานะการโหลดข้อมูล
-- **Error Handling**: จัดการ Error และแสดงข้อความที่เข้าใจง่าย
-- **Form Validation**: ตรวจสอบข้อมูลแบบ Real-time
-
-## 🔒 Security Features
-
-- **Input Validation**: ตรวจสอบข้อมูลก่อนส่งไป Backend
-- **XSS Protection**: ป้องกัน Cross-site Scripting
-- **CORS Handling**: จัดการ Cross-Origin Requests อย่างปลอดภัย
-- **Error Sanitization**: ไม่แสดงข้อมูลสำคัญใน Error Messages
-
-## 📊 Data Validation
-
-### เลขบัตรประชาชนไทย
-- ตรวจสอบรูปแบบ 13 หลัก
-- คำนวณเลขตรวจสอบ (Check Digit)
-
-### Passport Number
-- รองรับรูปแบบสากล (6-9 ตัวอักษร)
-- ตัวอักษรและตัวเลข
-
-## 🌐 Internationalization
-
-- **ภาษาไทย**: UI และข้อความทั้งหมด
-- **ภาษาอังกฤษ**: รองรับการเปลี่ยนภาษา
-- **Date Formatting**: จัดรูปแบบวันที่ตามภาษา
-
-## 📱 Browser Support
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-## 🚀 Deployment
-
-### Build for Production
-```bash
-npm run build
-```
-
-### Deploy to Static Hosting
-ไฟล์ที่ build แล้วจะอยู่ในโฟลเดอร์ `build/` สามารถ deploy ไปยัง:
-- Netlify
-- Vercel
-- GitHub Pages
-- AWS S3 + CloudFront
-
-## 🐛 Troubleshooting
-
-### ปัญหาที่อาจเจอ:
-
-1. **CORS Error**
-   - ตรวจสอบ Backend API ทำงานที่ port 3000
-   - ตรวจสอบ CORS configuration ใน Backend
-
-2. **API Connection Failed**
-   - ตรวจสอบ Backend server ทำงานหรือไม่
-   - ตรวจสอบ URL ใน environment variables
-
-3. **Build Error**
-   - ลบ `node_modules` และ `package-lock.json`
-   - รัน `npm install` ใหม่
-
-## 📞 Support
-
-หากมีปัญหาหรือข้อสงสัย:
-- Email: developer@company.com
-- เอกสาร API: ดูไฟล์คำแนะนำจาก Backend team
-
-## 📄 License
-
-Copyright © 2024 Consent Management System. All rights reserved.
-
----
-
-**Frontend พร้อมใช้งานแล้ว! 🎉**
-
-รันคำสั่ง `npm start` เพื่อเริ่มต้นใช้งาน
+## Report Columns
+Title, Name-Surname, ID (TYPE ****LAST4), Created Date, Created Time, Consent ID, ConsentType, Consent Language, IP Address, Browser

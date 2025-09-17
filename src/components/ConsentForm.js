@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { FileText, CheckCircle, AlertCircle, Loader2, Shield, Info, ArrowLeft, Send, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, AlertCircle, Loader2, Info, ArrowLeft, Send, ArrowRight, FileCheck } from 'lucide-react';
 import { consentAPI } from '../services/api';
 import ConsentContent from './ConsentContent';
 import axios from 'axios';
@@ -11,7 +11,7 @@ const ConsentForm = () => {
   const [step, setStep] = useState(1); // 1 = form, 2 = terms
   const [lang, setLang] = useState('th');
   const [formData, setFormData] = useState({
-    idPassport: '',
+    idPassportNumber: '',
     email: '',
     phone: '',
     consentGiven: false
@@ -22,44 +22,91 @@ const ConsentForm = () => {
   const [errors, setErrors] = useState({});
   const [existingRecord, setExistingRecord] = useState(null);
   const [activeVersion, setActiveVersion] = useState(null);
+  const [versionContent, setVersionContent] = useState(null);
   const [formTemplate, setFormTemplate] = useState(null);
+  const [showCheckButton, setShowCheckButton] = useState(false);
 
   // ดึงข้อมูลจาก localStorage และ active consent version
   useEffect(() => {
-    const storedData = localStorage.getItem('userData');
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      setUserData(parsedData);
-      // Use language from userData first, then fallback to localStorage or 'th'
-      const userLang = parsedData.language || localStorage.getItem('language') || 'th';
-      setLang(userLang);
-      // Ensure localStorage is in sync
-      localStorage.setItem('language', userLang);
-    } else {
-      navigate('/register');
-    }
-
-    fetchActiveVersion();
+    const fetchData = async () => {
+      const storedData = localStorage.getItem('userData');
+      if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        setUserData(parsedData);
+        // Use language from userData first, then fallback to localStorage or 'th'
+        const userLang = parsedData.language || localStorage.getItem('language') || 'th';
+        setLang(userLang);
+        // Ensure localStorage is in sync
+        localStorage.setItem('language', userLang);
+        
+        // Fetch active version after setting user data
+        await fetchActiveVersion();
+      } else {
+        navigate('/register');
+      }
+    };
+    
+    fetchData();
   }, [navigate]);
 
   const fetchActiveVersion = async () => {
     try {
-      // Get userType from sessionStorage or userData
+      // Get consentTitleId from sessionStorage or userData
       const registrationData = sessionStorage.getItem('registrationData');
+      let consentTitleId = null;
       let userType = 'customer';
       
       if (registrationData) {
         const parsed = JSON.parse(registrationData);
+        consentTitleId = parsed.consentTitleId;
         userType = parsed.userType || 'customer';
-      } else if (userData?.userType) {
-        userType = userData.userType;
       }
       
-      // Fetch version based on userType and language
-      const response = await consentAPI.getActiveVersionByType(userType, lang);
-      if (response?.data) {
-        setActiveVersion(response.data);
-        console.log(`Using version for ${userType}:`, response.data.version);
+      // If we have a title ID, fetch its content
+      if (consentTitleId) {
+        try {
+          const titleResponse = await axios.get(`http://localhost:3000/api/titles/${consentTitleId}/content`);
+          if (titleResponse?.data?.success) {
+            const titleData = titleResponse.data.data;
+            setActiveVersion({
+              id: titleData.version_id,
+              version: titleData.version,
+              language: titleData.language
+            });
+            
+            // Set content if available
+            if (titleData.content) {
+              setVersionContent({
+                content: titleData.content,
+                mimeType: titleData.mime_type,
+                fileName: titleData.file_name
+              });
+              console.log('Loaded consent content from title selection');
+            }
+          }
+        } catch (error) {
+          console.log('Could not load title content:', error);
+        }
+      } else {
+        // Fallback to userType-based version
+        const response = await consentAPI.getActiveVersionByType(userType, lang);
+        if (response?.data) {
+          setActiveVersion(response.data);
+          console.log(`Using version for ${userType}:`, response.data.version);
+          
+          // Fetch content from uploaded file
+          if (response.data.id) {
+            try {
+              const contentResponse = await axios.get(`http://localhost:3000/api/upload/consent-version/${response.data.id}/content`);
+              if (contentResponse?.data?.data) {
+                setVersionContent(contentResponse.data.data);
+                console.log('Loaded consent content from uploaded file');
+              }
+            } catch (contentError) {
+              console.log('Could not load uploaded content, using default');
+            }
+          }
+        }
       }
       
       // Also fetch form template
@@ -130,7 +177,7 @@ const ConsentForm = () => {
     }
     
     // ถ้ากรอก ID/Passport ครบแล้ว ให้เช็ค version ที่ควรใช้
-    if (name === 'idPassport' && value.length >= 13) {
+    if (name === 'idPassportNumber' && value.length >= 13) {
       fetchActiveVersion();
     }
   };
@@ -157,36 +204,36 @@ const ConsentForm = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.idPassport.trim()) {
-      newErrors.idPassport = lang === 'en' ? 'ID/Passport is required' : 'กรุณากรอกเลขบัตรประชาชน/Passport';
+    if (!formData.idPassportNumber || !formData.idPassportNumber.trim()) {
+      newErrors.idPassportNumber = lang === 'en' ? 'ID/Passport is required' : 'กรุณากรอกเลขบัตรประชาชน/Passport';
     } else {
-      const cleanId = formData.idPassport.replace(/[-\s]/g, '');
+      const cleanId = formData.idPassportNumber.replace(/[-\s]/g, '');
       
       // ตรวจสอบว่าเป็นเลขบัตรประชาชนไทย (13 หลัก) หรือ Passport
       if (/^[0-9]{13}$/.test(cleanId)) {
         // เลขบัตรประชาชนไทย - ตรวจสอบ checksum
         if (!validateThaiID(cleanId)) {
-          newErrors.idPassport = lang === 'en' 
+          newErrors.idPassportNumber = lang === 'en' 
             ? 'Invalid Thai ID card number' 
             : 'เลขบัตรประชาชนไม่ถูกต้อง';
         }
       } else if (cleanId.length < 6 || cleanId.length > 15) {
         // Passport หรือเอกสารอื่น - ตรวจสอบความยาว
-        newErrors.idPassport = lang === 'en' 
+        newErrors.idPassportNumber = lang === 'en' 
           ? 'ID/Passport must be 6-15 characters' 
           : 'เลขบัตร/Passport ต้องมี 6-15 ตัวอักษร';
       }
     }
     
-    if (!formData.email.trim()) {
+    if (!formData.email || !formData.email.trim()) {
       newErrors.email = lang === 'en' ? 'Email is required' : 'กรุณากรอกอีเมล';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = lang === 'en' ? 'Invalid email format' : 'รูปแบบอีเมลไม่ถูกต้อง';
     }
     
-    if (!formData.phone.trim()) {
+    if (!formData.phone || !formData.phone.trim()) {
       newErrors.phone = lang === 'en' ? 'Phone number is required' : 'กรุณากรอกเบอร์โทรศัพท์';
-    } else if (!/^[0-9+\-\s()]{8,15}$/.test(formData.phone)) {
+    } else if (!/^[0-9]{9,10}$/.test(formData.phone.replace(/[-\s]/g, ''))) {
       newErrors.phone = lang === 'en' ? 'Invalid phone number format' : 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง';
     }
     
@@ -228,32 +275,45 @@ const ConsentForm = () => {
     setErrors({});
 
     try {
-      // Get userType from sessionStorage
+      // Get userType from sessionStorage or userData
       const registrationData = sessionStorage.getItem('registrationData');
       let userType = 'customer';
       
       if (registrationData) {
         const parsed = JSON.parse(registrationData);
         userType = parsed.userType || 'customer';
+      } else if (userData?.userType) {
+        userType = userData.userType;
       }
       
-      // Combine firstName and lastName into nameSurname for backend
-      const nameSurname = `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 
-                         `${userData?.firstName || ''} ${userData?.lastName || ''}`.trim();
+      // Get nameSurname from userData.fullName or combine firstName/lastName
+      const nameSurname = userData?.fullName || 
+                         `${userData?.firstName || ''} ${userData?.lastName || ''}`.trim() ||
+                         `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
       
+      // Clean up the data to send only what backend expects
       const submitData = {
-        ...userData,
-        ...formData,
-        nameSurname: nameSurname, // Backend expects this field
+        title: userData?.title || '',
+        nameSurname: nameSurname,
+        idPassport: formData.idPassportNumber || '', // Map idPassportNumber to idPassport
+        email: formData.email || '',
+        phone: formData.phone || '',
         language: lang,
-        consentType: userData?.userType || 'customer',
-        userType: userData?.userType || 'customer',
+        userType: userType, // Use the userType we determined above
         consentVersion: activeVersion?.version || '1.0',
-        consentVersionId: activeVersion?.id || null,
-        formTemplateId: formTemplate?.id || null
+        consentVersionId: activeVersion?.id || null
       };
 
+      // Remove any undefined or extra fields
+      Object.keys(submitData).forEach(key => {
+        if (submitData[key] === undefined) {
+          delete submitData[key];
+        }
+      });
+
       console.log('Submitting data:', submitData);
+      console.log('FormData state:', formData);
+      console.log('UserData state:', userData);
       const result = await consentAPI.submitConsent(submitData);
       
       if (result.success) {
@@ -275,8 +335,13 @@ const ConsentForm = () => {
     } catch (error) {
       console.error('Submission error:', error);
       
+      // Log validation errors if present
+      if (error.response?.data?.errors) {
+        console.error('Validation errors detail:', error.response.data.errors);
+      }
+      
       // Check if it's a duplicate consent error
-      if (error.response?.status === 409 || error.message?.includes('already exists')) {
+      if (error.response?.status === 409) {
         const existingRec = error.response?.data?.existingRecord;
         
         // Show existing record info if available
@@ -288,9 +353,12 @@ const ConsentForm = () => {
             setMessage({
               type: 'warning',
               text: lang === 'en' 
-                ? `You have already given consent for version ${existingRec.consent_version}. Please check your existing consent status.`
-                : `คุณได้ให้ความยินยอมสำหรับเวอร์ชัน ${existingRec.consent_version} แล้ว กรุณาตรวจสอบสถานะความยินยอมของคุณ`
+                ? `You have already given consent for version ${existingRec.consent_version} on ${new Date(existingRec.created_date).toLocaleDateString()}. Your consent is still active.`
+                : `คุณได้ให้ความยินยอมสำหรับเวอร์ชัน ${existingRec.consent_version} เมื่อวันที่ ${new Date(existingRec.created_date).toLocaleDateString('th-TH')} แล้ว ความยินยอมของคุณยังมีผลอยู่`
             });
+            
+            // Show button to check consent
+            setShowCheckButton(true);
           } else {
             setMessage({
               type: 'info',
@@ -303,9 +371,10 @@ const ConsentForm = () => {
           setMessage({
             type: 'warning',
             text: lang === 'en' 
-              ? 'Consent record already exists for this ID/Passport.'
-              : 'มีข้อมูลความยินยอมสำหรับเลขบัตรประชาชน/พาสปอร์ตนี้แล้ว'
+              ? 'Consent record already exists for this ID/Passport. Please check your consent status.'
+              : 'มีข้อมูลความยินยอมสำหรับเลขบัตรประชาชน/พาสปอร์ตนี้แล้ว กรุณาตรวจสอบสถานะความยินยอมของคุณ'
           });
+          setShowCheckButton(true);
         }
       } else {
         setMessage({
@@ -360,16 +429,16 @@ const ConsentForm = () => {
                 </label>
                 <input
                   type="text"
-                  name="idPassport"
-                  value={formData.idPassport}
+                  name="idPassportNumber"
+                  value={formData.idPassportNumber}
                   onChange={handleInputChange}
                   placeholder={text[lang].idPlaceholder}
                   className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all backdrop-blur-sm"
                 />
-                {errors.idPassport && (
+                {errors.idPassportNumber && (
                   <p className="text-sm text-red-500 flex items-center">
                     <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
-                    {errors.idPassport}
+                    {errors.idPassportNumber}
                   </p>
                 )}
               </div>
@@ -470,11 +539,15 @@ const ConsentForm = () => {
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
           {/* Terms Content */}
           <div className="max-h-96 overflow-y-auto mb-6 bg-gray-50 rounded-xl">
-            <ConsentContent 
-              userData={userData}
-              formData={formData}
-              language={lang}
-            />
+            {step === 2 && (
+              <ConsentContent 
+                language={lang}
+                formData={formData}
+                handleInputChange={handleInputChange}
+                errors={errors}
+                versionContent={versionContent}
+              />
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -558,23 +631,34 @@ const ConsentForm = () => {
                 <ArrowLeft className="h-5 w-5 inline mr-2" />
                 {text[lang].backBtn}
               </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    {lang === 'th' ? 'กำลังส่ง...' : 'Submitting...'}
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-5 w-5 inline mr-2" />
-                    {text[lang].submitBtn}
-                  </>
-                )}
-              </button>
+              {showCheckButton ? (
+                <button
+                  type="button"
+                  onClick={() => navigate('/check')}
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  <FileCheck className="h-5 w-5 inline mr-2" />
+                  {lang === 'th' ? 'ตรวจสอบสถานะ' : 'Check Status'}
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      {lang === 'th' ? 'กำลังส่ง...' : 'Submitting...'}
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-5 w-5 inline mr-2" />
+                      {text[lang].submitBtn}
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           </form>
         </div>

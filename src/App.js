@@ -1,23 +1,19 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import LandingPage from './pages/LandingPage';
-import InitialRegistration from './pages/InitialRegistration';
-import ConsentForm from './components/ConsentForm';
-import CheckConsent from './pages/CheckConsent';
-import AdminDashboard from './components/AdminDashboard';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import CreateSinglePolicy from './pages/CreateSinglePolicy';
+import PolicyManager from './pages/PolicyManager';
+import ConsentLinks from './pages/ConsentLinks';
+import AdminPolicyManagement from './pages/AdminPolicyManagement';
 import AdminLogin from './pages/AdminLogin';
-import ConsentVersions from './pages/ConsentVersions';
-import ConsentVersionTargeting from './pages/VersionTargeting';
-import ConsentVersionManager from './pages/ConsentVersionManager';
-import FormTemplateManager from './pages/FormTemplateManager';
-import ConsentFormEditor from './pages/ConsentFormEditor';
-import clearStorage from './utils/clearStorage';
-import StorageCleaner from './components/StorageCleaner';
-import './App.css';
-
-// Admin Components
+import AdminConsentDashboard from './pages/AdminConsentDashboard';
+import AdminConsentManager from './pages/AdminConsentManager';
+// import AdminConsentLinks from './pages/AdminConsentLinks'; // ไม่จำเป็น - ซ้ำกับ Dashboard
 import AdminLayout from './layouts/AdminLayout';
+import ErrorBoundary from './components/ErrorBoundary';
+import ConsentFlowPage from './pages/ConsentFlowPage';
+import LanguageSelectionPage from './pages/LanguageSelectionPage';
+import SimplePolicyManager from './pages/SimplePolicyManager';
+import CheckConsent from './pages/CheckConsent';
 
 // Protected Route Component
 const ProtectedAdminRoute = ({ children }) => {
@@ -25,78 +21,96 @@ const ProtectedAdminRoute = ({ children }) => {
   if (!adminToken) {
     return <Navigate to="/admin/login" replace />;
   }
-  return <AdminLayout>{children}</AdminLayout>;
+  return children;
 };
 
-// Customer Layout Component
-const CustomerLayout = ({ children }) => (
-  <div className="min-h-screen bg-gray-50 flex flex-col">
-    <Navbar />
-    <main className="flex-grow">{children}</main>
-  </div>
-);
+// Create router with future flags enabled
+const router = createBrowserRouter([
+  // Public Routes
+  { path: "/", element: <Navigate to="/consent/select-language" /> },
+  { path: "/consent/select-language", element: <LanguageSelectionPage /> },
+  { path: "/consent/:userType", element: <ConsentFlowPage /> },
+  { path: "/create-policy", element: <CreateSinglePolicy /> },
+  { path: "/policy-manager", element: <SimplePolicyManager /> },
+  { path: "/check-consent", element: <CheckConsent /> },
+  
+  // Admin Routes
+  { path: "/admin/login", element: <AdminLogin /> },
+  { path: "/admin", element: <Navigate to="/admin/dashboard" replace /> },
+  {
+    path: "/admin/dashboard",
+    element: (
+      <ProtectedAdminRoute>
+        <AdminLayout>
+          <AdminConsentDashboard />
+        </AdminLayout>
+      </ProtectedAdminRoute>
+    )
+  },
+  {
+    path: "/admin/consents",
+    element: (
+      <ProtectedAdminRoute>
+        <AdminLayout>
+          <AdminConsentManager />
+        </AdminLayout>
+      </ProtectedAdminRoute>
+    )
+  },
+  {
+    path: "/admin/links",
+    element: (
+      <ProtectedAdminRoute>
+        {/* <Route path="consent-links" element={<AdminConsentLinks />} /> ไม่จำเป็น - ซ้ำกับ Dashboard */}
+        <AdminLayout>
+        </AdminLayout>
+      </ProtectedAdminRoute>
+    )
+  },
+  {
+    path: "/admin/policies",
+    element: (
+      <ProtectedAdminRoute>
+        <AdminLayout>
+          <SimplePolicyManager />
+        </AdminLayout>
+      </ProtectedAdminRoute>
+    )
+  },
+  {
+    path: "/admin/create-policy",
+    element: (
+      <ProtectedAdminRoute>
+        <AdminLayout>
+          <CreateSinglePolicy />
+        </AdminLayout>
+      </ProtectedAdminRoute>
+    )
+  },
+  {
+    path: "/admin/consent-links",
+    element: (
+      <ProtectedAdminRoute>
+        <AdminLayout>
+          <SimplePolicyManager />
+        </AdminLayout>
+      </ProtectedAdminRoute>
+    )
+  },
+  // Default redirect
+  { path: "*", element: <Navigate to="/" replace /> }
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+});
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Customer Routes */}
-        <Route path="/" element={
-          <CustomerLayout>
-            <LandingPage />
-          </CustomerLayout>
-        } />
-        <Route path="/register" element={
-          <CustomerLayout>
-            <InitialRegistration />
-          </CustomerLayout>
-        } />
-        <Route path="/consent" element={
-          <CustomerLayout>
-            <ConsentForm />
-          </CustomerLayout>
-        } />
-
-        {/* Admin Routes */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={
-          <ProtectedAdminRoute>
-            <AdminDashboard />
-          </ProtectedAdminRoute>
-        } />
-        <Route path="/admin/versions" element={
-          <ProtectedAdminRoute>
-            <ConsentVersions />
-          </ProtectedAdminRoute>
-        } />
-        <Route path="/admin/version-targeting" element={
-          <ProtectedAdminRoute>
-            <ConsentVersionTargeting />
-          </ProtectedAdminRoute>
-        } />
-        <Route path="/admin/version-manager" element={
-          <ProtectedAdminRoute>
-            <ConsentVersionManager />
-          </ProtectedAdminRoute>
-        } />
-        <Route path="/admin/form-templates" element={
-          <ProtectedAdminRoute>
-            <FormTemplateManager />
-          </ProtectedAdminRoute>
-        } />
-        <Route path="/admin/consent-forms" element={
-          <ProtectedAdminRoute>
-            <ConsentFormEditor />
-          </ProtectedAdminRoute>
-        } />
-        
-        {/* Default redirect */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      
-      {/* Storage Cleaner Button - Always visible */}
-      <StorageCleaner />
-    </Router>
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   );
 }
 

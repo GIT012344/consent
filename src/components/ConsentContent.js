@@ -1,11 +1,76 @@
 import React from 'react';
-import { FileText, Shield, Clock, Globe, Users, Lock, Phone, Mail, MapPin } from 'lucide-react';
+import { Shield, FileText, MapPin, Phone, Mail } from 'lucide-react';
 
-const ConsentContent = ({ userData, formData, language = 'th' }) => {
+const ConsentContent = ({ language, versionContent, userData, formData }) => {
+  // Use content from Policy Manager if available
+  if (versionContent && versionContent.content) {
+    const content = versionContent.content;
+    
+    // Check content type and render accordingly
+    // 1. Check if it's Markdown (contains markdown indicators)
+    const isMarkdown = content.includes('##') || content.includes('**') || content.includes('- ') || content.includes('* ');
+    
+    // 2. Check if it's HTML
+    const isHTML = content.includes('<') && content.includes('>');
+    
+    if (isMarkdown && !isHTML) {
+      // Convert Markdown to HTML for display
+      const convertMarkdownToHTML = (md) => {
+        let html = md;
+        // Headers
+        html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>');
+        html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>');
+        html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-4">$1</h1>');
+        // Bold
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        // Lists
+        html = html.replace(/^\* (.+)/gim, '<li class="ml-4 mb-1">• $1</li>');
+        html = html.replace(/^- (.+)/gim, '<li class="ml-4 mb-1">• $1</li>');
+        html = html.replace(/^\d+\. (.+)/gim, '<li class="ml-4 mb-1">$1</li>');
+        // Line breaks - preserve double line breaks as paragraphs
+        html = html.split('\n\n').map(para => `<p class="mb-4">${para}</p>`).join('');
+        // Single line breaks within paragraphs
+        html = html.replace(/\n/g, '<br/>');
+        return html;
+      };
+      
+      return (
+        <div className="p-6">
+          <div 
+            className="prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: convertMarkdownToHTML(content) }} 
+          />
+        </div>
+      );
+    }
+    
+    if (isHTML) {
+      return (
+        <div className="p-6">
+          <div 
+            className="prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: content }} 
+          />
+        </div>
+      );
+    }
+    
+    // Plain text - preserve line breaks and formatting
+    return (
+      <div className="p-6">
+        <div className="whitespace-pre-wrap font-sans text-gray-800 leading-relaxed">
+          {content}
+        </div>
+      </div>
+    );
+  }
+  
+  // Default hardcoded content as fallback
   const fullName = userData?.nameSurname || userData?.fullName || 'XXXXXXXXXXXXXXXXXXXXXXX';
   const idNumber = formData?.idPassport || 'N-NNNN-NNNNN-NN-N';
 
-  const content = {
+  // Select content based on language prop - STRICT language separation
+  const contentByLanguage = {
     th: {
       title: 'หนังสือให้ความยินยอมในการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคล',
       institute: 'สถาบันวิจัยและพัฒนาอัญมณีและเครื่องประดับแห่งชาติ (องค์การมหาชน)',
@@ -158,17 +223,18 @@ const ConsentContent = ({ userData, formData, language = 'th' }) => {
           }
         }
       ],
-      acknowledgment: 'I acknowledge the Institute\'s personal data protection policy regarding the terms and conditions for disclosing my personal data for the purposes described above and hereby grant my consent to the Institute as follows:'
+      acknowledgment: 'I acknowledge that I have been informed of the Institute\'s personal data protection policy regarding the terms and conditions for disclosing my personal data for the purposes described above, and I hereby grant my consent to the Institute as follows:'
     }
   };
 
-  const currentContent = content[language] || content.th;
+  // Use ONLY the content for the selected language
+  const currentContent = contentByLanguage[language] || contentByLanguage['th'];
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-xl p-6 text-white">
-        <div className="flex items-center justify-center mb-4">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-xl p-6 sm:p-8">
+        <div className="flex justify-center mb-4">
           <Shield className="w-12 h-12" />
         </div>
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center">

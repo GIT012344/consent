@@ -1,53 +1,31 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
-  Home, Users, FileText, Settings, LogOut, Menu, X, 
-  BarChart2, Shield, Download, ChevronDown, Upload
-} from 'lucide-react';
+  DashboardOutlined, 
+  FileTextOutlined, 
+  BarChartOutlined, 
+  UserOutlined, 
+  FormOutlined, 
+  TeamOutlined, 
+  LogoutOutlined, 
+  MenuFoldOutlined, 
+  MenuUnfoldOutlined, 
+  PlusOutlined, 
+  LinkOutlined
+} from '@ant-design/icons';
 
 const AdminLayout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const menuItems = [
-    { 
-      path: '/admin/dashboard', 
-      label: 'Dashboard', 
-      icon: Home,
-      description: 'ภาพรวมระบบ'
-    },
-    { 
-      path: '/admin/consents', 
-      label: 'Consent Data', 
-      icon: Users,
-      description: 'ข้อมูลความยินยอม'
-    },
-    { 
-      path: '/admin/consent-versions', 
-      label: 'Version Management', 
-      icon: FileText,
-      description: 'จัดการเวอร์ชัน'
-    },
-    { 
-      path: '/admin/version-targeting', 
-      label: 'Version Targeting', 
-      icon: Settings,
-      description: 'กำหนดเวอร์ชันตามกลุ่ม'
-    },
-    { 
-      path: '/admin/reports', 
-      label: 'Reports & Export', 
-      icon: Download,
-      description: 'รายงานและส่งออกข้อมูล'
-    },
-    { 
-      path: '/admin/security', 
-      label: 'Security Settings', 
-      icon: Shield,
-      description: 'ตั้งค่าความปลอดภัย'
-    }
+    { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', path: '/admin/dashboard' },
+    { key: 'consents', icon: <FileTextOutlined />, label: 'Consent Records', path: '/admin/consents' },
+    { key: 'policies', icon: <FileTextOutlined />, label: 'Policy Management', path: '/admin/policies' },
+    { key: 'create-policy', icon: <PlusOutlined />, label: 'สร้าง Policy', path: '/admin/create-policy' },
+    { key: 'consent-links', icon: <LinkOutlined />, label: 'Consent Links', path: '/admin/links' }
   ];
 
   const handleLogout = () => {
@@ -68,18 +46,17 @@ const AdminLayout = ({ children }) => {
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="text-gray-300 hover:text-white transition"
             >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {sidebarOpen ? <MenuFoldOutlined className="w-5 h-5" /> : <MenuUnfoldOutlined className="w-5 h-5" />}
             </button>
           </div>
 
           <nav className="space-y-1">
             {menuItems.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.path;
               
               return (
                 <Link
-                  key={item.path}
+                  key={item.key}
                   to={item.path}
                   className={`flex items-center px-3 py-3 rounded-lg transition-all ${
                     isActive 
@@ -87,12 +64,9 @@ const AdminLayout = ({ children }) => {
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                   }`}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {item.icon}
                   {sidebarOpen && (
-                    <div className="ml-3">
-                      <div className="font-medium">{item.label}</div>
-                      <div className="text-xs opacity-75">{item.description}</div>
-                    </div>
+                    <span className="ml-3">{item.label}</span>
                   )}
                 </Link>
               );
@@ -116,7 +90,9 @@ const AdminLayout = ({ children }) => {
                     <div className="text-sm font-medium">Admin User</div>
                     <div className="text-xs text-gray-400">admin@consent.com</div>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </>
               )}
             </button>
@@ -127,7 +103,7 @@ const AdminLayout = ({ children }) => {
                   onClick={handleLogout}
                   className="flex items-center w-full px-4 py-3 text-left hover:bg-gray-700 transition"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogoutOutlined className="h-4 w-4 mr-2" />
                   <span>ออกจากระบบ</span>
                 </button>
               </div>

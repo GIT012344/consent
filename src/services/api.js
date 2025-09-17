@@ -3,45 +3,62 @@ import axios from 'axios';
 // ตั้งค่า Base URL สำหรับ API
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
+// Clear large cookies/storage to prevent 431 error
+if (typeof window !== 'undefined') {
+  try {
+    // Clear all cookies
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    // Keep only essential items
+    const essentials = {
+      adminToken: localStorage.getItem('adminToken'),
+      userType: localStorage.getItem('userType'),
+      language: localStorage.getItem('language')
+    };
+    
+    // Clear all storage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Restore essentials with size limit
+    Object.entries(essentials).forEach(([key, value]) => {
+      if (value && value.length < 100) {
+        localStorage.setItem(key, value);
+      }
+    });
+  } catch (e) {
+    console.log('Storage cleanup error:', e);
+  }
+}
+
 // สร้าง axios instance
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  timeout: 30000
 });
 
-// Request interceptor
+// Request interceptor - MINIMAL headers to prevent 431
 api.interceptors.request.use(
   (config) => {
-    console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
+    // Only essential headers
+    config.headers = {
+      'Content-Type': config.data instanceof FormData ? 'multipart/form-data' : 'application/json'
+    };
     
-    // Clean up headers - remove any large or unnecessary headers
-    const cleanHeaders = {};
-    const maxHeaderSize = 4096; // 4KB max per header
-    
-    for (const [key, value] of Object.entries(config.headers)) {
-      if (value && typeof value === 'string' && value.length < maxHeaderSize) {
-        cleanHeaders[key] = value;
-      } else if (value && typeof value !== 'string') {
-        // Keep non-string headers (like Content-Type object)
-        cleanHeaders[key] = value;
-      }
+    // Add auth token only if needed and small
+    const token = localStorage.getItem('adminToken');
+    if (token && token.length < 100 && config.url?.includes('/admin')) {
+      config.headers['Authorization'] = `Bearer ${token.substring(0, 100)}`;
     }
     
-    config.headers = cleanHeaders;
-    
-    // Add auth token if exists, but limit size
-    const adminToken = localStorage.getItem('adminToken');
-    if (adminToken && adminToken.length < 1000) {
-      config.headers['Authorization'] = `Bearer ${adminToken}`;
-    }
+    // Remove any cookies from request
+    config.withCredentials = false;
     
     return config;
   },
   (error) => {
-    console.error('❌ Request Error:', error);
     return Promise.reject(error);
   }
 );
