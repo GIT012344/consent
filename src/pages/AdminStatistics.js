@@ -21,7 +21,7 @@ const AdminStatistics = () => {
 
   const fetchStatistics = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/admin/statistics', {
+      const response = await axios.get('https://consent-back.onrender.com/api/admin/statistics', {
         params: dateRange
       });
       setStats(response.data.stats || {
@@ -54,7 +54,7 @@ const AdminStatistics = () => {
 
   const exportData = async (format) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/admin/export', {
+      const response = await axios.post('https://consent-back.onrender.com/api/admin/export', {
         format,
         ...dateRange
       });

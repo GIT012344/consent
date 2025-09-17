@@ -16,7 +16,7 @@ const AdminConsentLinks = () => {
   const loadPolicies = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/simple-policy');
+      const response = await axios.get('https://consent-back.onrender.com/api/simple-policy');
       if (response.data && response.data.success) {
         setPolicies(response.data.data || []);
       }

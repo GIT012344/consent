@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // ตั้งค่า Base URL สำหรับ API
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const BASE_URL = process.env.REACT_APP_API_URL || 'https://consent-back.onrender.com/api';
 
 // Clear large cookies/storage to prevent 431 error
 if (typeof window !== 'undefined') {

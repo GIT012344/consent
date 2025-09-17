@@ -18,7 +18,7 @@ const AdminPolicyManagement = () => {
   const loadPolicies = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:3000/api/simple-policy');
+      const response = await axios.get('https://consent-back.onrender.com/api/simple-policy');
       if (response.data && response.data.success) {
         setPolicies(response.data.data || []);
       }
@@ -38,8 +38,8 @@ const AdminPolicyManagement = () => {
   const handleSubmit = async (values) => {
     try {
       const url = editMode 
-        ? `http://localhost:3000/api/simple-policy/${selectedPolicy.id}`
-        : 'http://localhost:3000/api/simple-policy';
+        ? `https://consent-back.onrender.com/api/simple-policy/${selectedPolicy.id}`
+        : 'https://consent-back.onrender.com/api/simple-policy';
       
       const method = editMode ? 'put' : 'post';
       
@@ -60,7 +60,7 @@ const AdminPolicyManagement = () => {
   // Handle delete policy
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/simple-policy/${id}`);
+      const response = await axios.delete(`https://consent-back.onrender.com/api/simple-policy/${id}`);
       if (response.data && response.data.success) {
         message.success('Policy deleted successfully');
         loadPolicies();
@@ -74,7 +74,7 @@ const AdminPolicyManagement = () => {
   // Handle toggle active status
   const handleToggleActive = async (policy) => {
     try {
-      const response = await axios.put(`http://localhost:3000/api/simple-policy/${policy.id}`, {
+      const response = await axios.put(`https://consent-back.onrender.com/api/simple-policy/${policy.id}`, {
         ...policy,
         is_active: !policy.is_active
       });

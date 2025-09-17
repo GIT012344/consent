@@ -19,7 +19,7 @@ const AdminConsentTitleManager = () => {
 
   const fetchTitles = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/titles');
+      const response = await axios.get('https://consent-back.onrender.com/api/titles');
       if (response.data.success) {
         setTitles(response.data.data || []);
       }
@@ -34,7 +34,7 @@ const AdminConsentTitleManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('ต้องการลบคำนำหน้านี้หรือไม่?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/titles/${id}`);
+        await axios.delete(`https://consent-back.onrender.com/api/titles/${id}`);
         fetchTitles();
       } catch (err) {
         setError('ไม่สามารถลบข้อมูลได้');
@@ -55,7 +55,7 @@ const AdminConsentTitleManager = () => {
 
   const toggleActive = async (id, currentStatus) => {
     try {
-      await axios.put(`http://localhost:3000/api/titles/${id}`, {
+      await axios.put(`https://consent-back.onrender.com/api/titles/${id}`, {
         is_active: !currentStatus
       });
       fetchTitles();
@@ -79,9 +79,9 @@ const AdminConsentTitleManager = () => {
     e.preventDefault();
     try {
       if (editingTitle) {
-        await axios.put(`http://localhost:3000/api/titles/${editingTitle.id}`, formData);
+        await axios.put(`https://consent-back.onrender.com/api/titles/${editingTitle.id}`, formData);
       } else {
-        await axios.post('http://localhost:3000/api/titles', formData);
+        await axios.post('https://consent-back.onrender.com/api/titles', formData);
       }
       handleCloseModal();
       fetchTitles();

@@ -124,7 +124,7 @@ const ConsentFlowPage = () => {
   const loadTitles = async () => {
     setLoadingTitles(true);
     try {
-      const response = await axios.get(`http://localhost:3000/api/titles`);
+      const response = await axios.get(`https://consent-back.onrender.com/api/titles`);
       if (response.data && response.data.success && response.data.data) {
         setTitles(response.data.data);
       } else {
@@ -149,7 +149,7 @@ const ConsentFlowPage = () => {
   // Load form fields from backend
   const loadFormFields = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/form-fields`);
+      const response = await axios.get(`https://consent-back.onrender.com/api/form-fields`);
       if (response.data && response.data.success && response.data.data) {
         setFormFields(response.data.data);
       }
@@ -167,7 +167,7 @@ const ConsentFlowPage = () => {
       
       // Get policy from simple-policy API
       const response = await axios.get(
-        `http://localhost:3000/api/simple-policy/active?userType=${currentUserType}&language=${currentLang}`
+        `https://consent-back.onrender.com/api/simple-policy/active?userType=${currentUserType}&language=${currentLang}`
       );
 
       if (response.data && response.data.data) {
@@ -308,13 +308,11 @@ const ConsentFlowPage = () => {
         consentDate: new Date().toISOString(),
         policyId: policyContent?.id || null,
         policyTitle: policyContent?.title || 'Consent Policy',
-        policyVersion: policyContent?.version || '1.0',
-        browser: browserInfo,
-        userAgent: userAgent
+        policyVersion: policyContent?.version || '1.0'
       };
 
       // Submit to correct endpoint
-      const response = await axios.post('http://localhost:3000/api/consent', payload);
+      const response = await axios.post('https://consent-back.onrender.com/api/consent/submit', payload);
       
       if (response.data && response.data.success) {
         setCurrentStep(4);

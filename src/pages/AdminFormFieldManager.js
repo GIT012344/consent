@@ -36,7 +36,7 @@ const AdminFormFieldManager = () => {
 
   const fetchFormFields = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/form-fields');
+      const response = await axios.get('https://consent-back.onrender.com/api/form-fields');
       if (response.data.success) {
         setFormFields(response.data.data || []);
       }
@@ -51,7 +51,7 @@ const AdminFormFieldManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('ต้องการลบฟิลด์นี้หรือไม่?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/form-fields/${id}`);
+        await axios.delete(`https://consent-back.onrender.com/api/form-fields/${id}`);
         fetchFormFields();
       } catch (err) {
         setError('ไม่สามารถลบข้อมูลได้');
@@ -77,7 +77,7 @@ const AdminFormFieldManager = () => {
 
   const toggleActive = async (id, currentStatus) => {
     try {
-      await axios.put(`http://localhost:3000/api/form-fields/${id}`, {
+      await axios.put(`https://consent-back.onrender.com/api/form-fields/${id}`, {
         is_active: !currentStatus
       });
       fetchFormFields();
@@ -106,9 +106,9 @@ const AdminFormFieldManager = () => {
     e.preventDefault();
     try {
       if (editingField) {
-        await axios.put(`http://localhost:3000/api/form-fields/${editingField.id}`, formData);
+        await axios.put(`https://consent-back.onrender.com/api/form-fields/${editingField.id}`, formData);
       } else {
-        await axios.post('http://localhost:3000/api/form-fields', formData);
+        await axios.post('https://consent-back.onrender.com/api/form-fields', formData);
       }
       handleCloseModal();
       fetchFormFields();
