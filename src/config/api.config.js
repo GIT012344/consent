@@ -1,7 +1,10 @@
 // API Configuration
 const API_CONFIG = {
-  // Production API URL
-  BASE_URL: 'https://consent-back.onrender.com',
+  // Dynamic API URL based on environment
+  BASE_URL: process.env.REACT_APP_API_URL || 
+           (process.env.NODE_ENV === 'production' 
+             ? 'https://consent-backend-3hmi.onrender.com' // Your existing backend URL
+             : 'http://localhost:3000'),
   
   // API endpoints
   ENDPOINTS: {
