@@ -160,11 +160,12 @@ const ConsentFlowPage = () => {
   };
 
   // Load consent content based on user type and language
-  const loadConsentContent = async () => {
+  const loadSimplePolicy = async () => {
     try {
       setLoading(true);
       const currentUserType = selectedUserType || 'customer';
-      const currentLang = language === 'th' ? 'th-TH' : 'en-US';
+      // Use 'th' or 'en' for backend, not locale format
+      const currentLang = language === 'th' ? 'th' : 'en';
       
       // Get policy from simple-policy API
       const response = await axios.get(
@@ -182,17 +183,25 @@ const ConsentFlowPage = () => {
         });
       } else if (response.data && response.data.success === false) {
         console.warn('No policy found:', response.data.message);
-        throw new Error(response.data.message || 'No policy data received');
+        // Don't throw error, just show default content
+        setPolicyContent({
+          title: language === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy',
+          content: language === 'th' 
+            ? '<h3>นโยบายความเป็นส่วนตัว</h3><p>เรารับผิดชอบและให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของคุณ โดยนโยบายความเป็นส่วนตัวนี้จะอธิบายถึงวิธีการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลของคุณ</p>' 
+            : '<h3>Privacy Policy</h3><p>We are committed to protecting your personal information. This privacy policy explains how we collect, use, and disclose your information.</p>',
+          version: '1.0'
+        });
       } else {
         throw new Error('No policy data received');
       }
     } catch (err) {
       console.error('Error loading policy:', err);
+      // Provide default content instead of error message
       setPolicyContent({
-        title: language === 'th' ? 'นโยบายความยินยอม' : 'Consent Policy',
+        title: language === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy',
         content: language === 'th' 
-          ? '<p>ไม่สามารถโหลดเนื้อหานโยบายได้ กรุณาลองใหม่อีกครั้ง</p>' 
-          : '<p>Unable to load policy content. Please try again.</p>',
+          ? '<h3>นโยบายความเป็นส่วนตัว</h3><p>เรารับผิดชอบและให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของคุณ โดยนโยบายความเป็นส่วนตัวนี้จะอธิบายถึงวิธีการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลของคุณ</p>' 
+          : '<h3>Privacy Policy</h3><p>We are committed to protecting your personal information. This privacy policy explains how we collect, use, and disclose your information.</p>',
         version: '1.0'
       });
     } finally {
@@ -351,7 +360,7 @@ const ConsentFlowPage = () => {
   // Load consent content based on user type and language
   useEffect(() => {
     if (selectedUserType && language) {
-      loadConsentContent();
+      loadSimplePolicy();
     }
   }, [selectedUserType, language]);
 

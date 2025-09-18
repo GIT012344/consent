@@ -19,7 +19,7 @@ const AdminConsentDashboard = () => {
     setLoading(true);
     try {
       // Fetch consent records
-      const consentRes = await axios.get(`${API_BASE_URL}/consent/records`);
+      const consentRes = await axios.get(`${API_BASE_URL}/api/consent/records`);
       console.log('Consent records response:', consentRes.data);
       
       if (consentRes.data && consentRes.data.data) {
@@ -36,7 +36,7 @@ const AdminConsentDashboard = () => {
       }
       
       // Fetch active policies
-      const policyRes = await axios.get(`${API_BASE_URL}/simple-policy`);
+      const policyRes = await axios.get(`${API_BASE_URL}/api/simple-policy`);
       console.log('Policy response:', policyRes.data);
       
       if (policyRes.data && policyRes.data.data) {
@@ -47,7 +47,7 @@ const AdminConsentDashboard = () => {
       console.error('Error fetching data:', error);
       // Try alternative endpoints if main ones fail
       try {
-        const recordsRes = await axios.get(`${API_BASE_URL}/admin/dashboard/stats`);
+        const recordsRes = await axios.get(`${API_BASE_URL}/api/admin/dashboard/stats`);
         if (recordsRes.data && recordsRes.data.data) {
           setTotalConsents(recordsRes.data.data.total || 0);
           setTodayConsents(recordsRes.data.data.today || 0);
@@ -93,7 +93,7 @@ const AdminConsentDashboard = () => {
 
   const handleExport = async (format) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/consent/records`);
+      const response = await axios.get(`${API_BASE_URL}/api/consent/records`);
       if (response.data.success && response.data.data) {
         const csvContent = convertToCSV(response.data.data);
         const blob = new Blob([csvContent], { type: 'text/csv' });
