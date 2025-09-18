@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Space, Tag, Modal, Form, Input, Select, Switch, message, Tooltip, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined, CopyOutlined, EyeOutlined, EyeInvisibleOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -18,7 +19,7 @@ const AdminPolicyManagement = () => {
   const loadPolicies = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://consent-back.onrender.com/api/simple-policy');
+      const response = await axios.get(`${API_BASE_URL}/api/simple-policy`);
       if (response.data && response.data.success) {
         setPolicies(response.data.data || []);
       }
@@ -38,8 +39,8 @@ const AdminPolicyManagement = () => {
   const handleSubmit = async (values) => {
     try {
       const url = editMode 
-        ? `https://consent-back.onrender.com/api/simple-policy/${selectedPolicy.id}`
-        : 'https://consent-back.onrender.com/api/simple-policy';
+        ? `${API_BASE_URL}/api/simple-policy/${selectedPolicy.id}`
+        : `${API_BASE_URL}/api/simple-policy`;
       
       const method = editMode ? 'put' : 'post';
       
@@ -60,7 +61,7 @@ const AdminPolicyManagement = () => {
   // Handle delete policy
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`https://consent-back.onrender.com/api/simple-policy/${id}`);
+      const response = await axios.delete(`${API_BASE_URL}/api/simple-policy/${id}`);
       if (response.data && response.data.success) {
         message.success('Policy deleted successfully');
         loadPolicies();
@@ -74,7 +75,7 @@ const AdminPolicyManagement = () => {
   // Handle toggle active status
   const handleToggleActive = async (policy) => {
     try {
-      const response = await axios.put(`https://consent-back.onrender.com/api/simple-policy/${policy.id}`, {
+      const response = await axios.put(`${API_BASE_URL}/api/simple-policy/${policy.id}`, {
         ...policy,
         is_active: !policy.is_active
       });

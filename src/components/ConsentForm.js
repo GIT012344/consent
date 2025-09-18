@@ -65,7 +65,8 @@ const ConsentForm = () => {
       // If we have a title ID, fetch its content
       if (consentTitleId) {
         try {
-          const titleResponse = await axios.get(`https://consent-back.onrender.com/api/titles/${consentTitleId}/content`);
+          const baseUrl = process.env.REACT_APP_API_URL || 'https://consent-backend-3hmi.onrender.com';
+          const titleResponse = await axios.get(`${baseUrl}/api/titles/${consentTitleId}/content`);
           if (titleResponse?.data?.success) {
             const titleData = titleResponse.data.data;
             setActiveVersion({
@@ -97,7 +98,8 @@ const ConsentForm = () => {
           // Fetch content from uploaded file
           if (response.data.id) {
             try {
-              const contentResponse = await axios.get(`https://consent-back.onrender.com/api/upload/consent-version/${response.data.id}/content`);
+              const baseUrl = process.env.REACT_APP_API_URL || 'https://consent-backend-3hmi.onrender.com';
+              const contentResponse = await axios.get(`${baseUrl}/api/upload/consent-version/${response.data.id}/content`);
               if (contentResponse?.data?.data) {
                 setVersionContent(contentResponse.data.data);
                 console.log('Loaded consent content from uploaded file');
@@ -126,7 +128,8 @@ const ConsentForm = () => {
   // Fetch form template based on userType
   const fetchFormTemplate = async (userType, language) => {
     try {
-      const response = await axios.get(`https://consent-back.onrender.com/api/form-templates/active/${userType}/${language}`);
+      const baseUrl = process.env.REACT_APP_API_URL || 'https://consent-backend-3hmi.onrender.com';
+      const response = await axios.get(`${baseUrl}/api/form-templates/active/${userType}/${language}`);
       if (response?.data?.data) {
         const template = response.data.data;
         // Store template for later use

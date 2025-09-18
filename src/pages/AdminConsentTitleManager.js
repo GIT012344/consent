@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 
 const AdminConsentTitleManager = () => {
   const [titles, setTitles] = useState([]);
@@ -19,7 +20,7 @@ const AdminConsentTitleManager = () => {
 
   const fetchTitles = async () => {
     try {
-      const response = await axios.get('https://consent-back.onrender.com/api/titles');
+      const response = await axios.get(`${API_BASE_URL}/api/titles`);
       if (response.data.success) {
         setTitles(response.data.data || []);
       }
@@ -34,7 +35,7 @@ const AdminConsentTitleManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('ต้องการลบคำนำหน้านี้หรือไม่?')) {
       try {
-        await axios.delete(`https://consent-back.onrender.com/api/titles/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/titles/${id}`);
         fetchTitles();
       } catch (err) {
         setError('ไม่สามารถลบข้อมูลได้');
@@ -55,7 +56,7 @@ const AdminConsentTitleManager = () => {
 
   const toggleActive = async (id, currentStatus) => {
     try {
-      await axios.put(`https://consent-back.onrender.com/api/titles/${id}`, {
+      await axios.put(`${API_BASE_URL}/api/titles/${id}`, {
         is_active: !currentStatus
       });
       fetchTitles();
@@ -79,9 +80,9 @@ const AdminConsentTitleManager = () => {
     e.preventDefault();
     try {
       if (editingTitle) {
-        await axios.put(`https://consent-back.onrender.com/api/titles/${editingTitle.id}`, formData);
+        await axios.put(`${API_BASE_URL}/api/titles/${editingTitle.id}`, formData);
       } else {
-        await axios.post('https://consent-back.onrender.com/api/titles', formData);
+        await axios.post(`${API_BASE_URL}/api/titles`, formData);
       }
       handleCloseModal();
       fetchTitles();

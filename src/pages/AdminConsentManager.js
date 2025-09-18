@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 import { Search, Filter, Trash2, Power, Eye, Download, CheckCircle, XCircle, Calendar, User, Globe, FileText } from 'lucide-react';
 
 const AdminConsentManager = () => {
@@ -23,7 +24,7 @@ const AdminConsentManager = () => {
 
   const fetchUserTypes = async () => {
     try {
-      const response = await axios.get('https://consent-back.onrender.com/api/user-types');
+      const response = await axios.get(`${API_BASE_URL}/api/user-types`);
       if (response.data?.success && response.data?.data) {
         setUserTypes(response.data.data.map(ut => ut.type_name));
       }
@@ -35,7 +36,7 @@ const AdminConsentManager = () => {
   const fetchConsents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://consent-back.onrender.com/api/consent/records');
+      const response = await axios.get(`${API_BASE_URL}/api/consent/records`);
       console.log('Consent records response:', response.data);
       
       if (response.data) {
@@ -72,7 +73,7 @@ const AdminConsentManager = () => {
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      await axios.put(`https://consent-back.onrender.com/api/consent/records/${id}/status`, {
+      await axios.put(`${API_BASE_URL}/api/consent/records/${id}/status`, {
         status: newStatus
       });
       
@@ -91,7 +92,7 @@ const AdminConsentManager = () => {
     }
 
     try {
-      await axios.delete(`https://consent-back.onrender.com/api/consent/records/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/consent/records/${id}`);
       setConsents(consents.filter(c => c.id !== id));
       setSelectedConsents(selectedConsents.filter(sid => sid !== id));
     } catch (error) {
@@ -113,7 +114,7 @@ const AdminConsentManager = () => {
     try {
       await Promise.all(
         selectedConsents.map(id => 
-          axios.delete(`https://consent-back.onrender.com/api/consent/records/${id}`)
+          axios.delete(`${API_BASE_URL}/api/consent/records/${id}`)
         )
       );
       

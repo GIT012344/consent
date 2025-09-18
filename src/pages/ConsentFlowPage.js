@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 import { Globe, User, FileText, CheckCircle, ChevronRight, AlertCircle } from 'lucide-react';  
 import { useNavigate } from 'react-router-dom';
 
@@ -124,7 +125,7 @@ const ConsentFlowPage = () => {
   const loadTitles = async () => {
     setLoadingTitles(true);
     try {
-      const response = await axios.get(`https://consent-back.onrender.com/api/titles`);
+      const response = await axios.get(`${API_BASE_URL}/api/titles`);
       if (response.data && response.data.success && response.data.data) {
         setTitles(response.data.data);
       } else {
@@ -149,7 +150,7 @@ const ConsentFlowPage = () => {
   // Load form fields from backend
   const loadFormFields = async () => {
     try {
-      const response = await axios.get(`https://consent-back.onrender.com/api/form-fields`);
+      const response = await axios.get(`${API_BASE_URL}/api/form-fields`);
       if (response.data && response.data.success && response.data.data) {
         setFormFields(response.data.data);
       }
@@ -167,7 +168,7 @@ const ConsentFlowPage = () => {
       
       // Get policy from simple-policy API
       const response = await axios.get(
-        `https://consent-back.onrender.com/api/simple-policy/active?userType=${currentUserType}&language=${currentLang}`
+        `${API_BASE_URL}/api/simple-policy/active?userType=${currentUserType}&language=${currentLang}`
       );
 
       if (response.data && response.data.data) {
@@ -312,7 +313,7 @@ const ConsentFlowPage = () => {
       };
 
       // Submit to correct endpoint
-      const response = await axios.post('https://consent-back.onrender.com/api/consent/submit', payload);
+      const response = await axios.post(`${API_BASE_URL}/api/consent/submit`, payload);
       
       if (response.data && response.data.success) {
         setCurrentStep(4);

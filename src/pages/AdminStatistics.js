@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Users, FileCheck, TrendingUp, Download, Calendar } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 
 const AdminStatistics = () => {
   const [stats, setStats] = useState({
@@ -21,7 +22,7 @@ const AdminStatistics = () => {
 
   const fetchStatistics = async () => {
     try {
-      const response = await axios.get('https://consent-back.onrender.com/api/admin/statistics', {
+      const response = await axios.get(`${API_BASE_URL}/api/admin/statistics`, {
         params: dateRange
       });
       setStats(response.data.stats || {
@@ -54,7 +55,7 @@ const AdminStatistics = () => {
 
   const exportData = async (format) => {
     try {
-      const response = await axios.post('https://consent-back.onrender.com/api/admin/export', {
+      const response = await axios.post(`${API_BASE_URL}/api/admin/export`, {
         format,
         ...dateRange
       });

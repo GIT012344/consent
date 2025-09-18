@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart3, Users, Shield, Settings, Plus, ExternalLink, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://consent-back.onrender.com/api';
+import { API_BASE_URL } from '../config/constants';
 
 const AdminConsentDashboard = () => {
   const navigate = useNavigate();

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link2, Copy, CheckCircle, Globe, Users, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 
 const AdminConsentLinks = () => {
   const [policies, setPolicies] = useState([]);
@@ -16,7 +17,7 @@ const AdminConsentLinks = () => {
   const loadPolicies = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://consent-back.onrender.com/api/simple-policy');
+      const response = await axios.get(`${API_BASE_URL}/api/simple-policy`);
       if (response.data && response.data.success) {
         setPolicies(response.data.data || []);
       }
