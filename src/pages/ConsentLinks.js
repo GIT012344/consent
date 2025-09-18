@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link2, Copy, Check, Globe, Users, Building, Briefcase } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 
 const ConsentLinks = () => {
   const [userTypes, setUserTypes] = useState([]);
@@ -15,7 +16,7 @@ const ConsentLinks = () => {
   // Load user types from backend
   const loadUserTypes = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/user-types');
+      const response = await axios.get(`${API_BASE_URL}/api/user-types`);
       if (response.data && response.data.success) {
         setUserTypes(response.data.data || []);
       } else {

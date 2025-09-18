@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -68,7 +69,7 @@ const CreateSinglePolicy = () => {
         enforce_mode: formData.enforce_mode
       };
 
-      const response = await axios.post('http://localhost:3000/api/simple-policy', policyData);
+      const response = await axios.post(`${API_BASE_URL}/api/simple-policy`, policyData);
       
       if (response.data.success) {
         // Refresh Policy Management page data

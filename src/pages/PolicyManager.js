@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 import { Plus, Download, Eye, Edit, Copy, Power, Filter, Search, Calendar, Users, Globe, AlertCircle, Trash2 } from 'lucide-react';
 
 const PolicyManager = () => {
@@ -47,7 +48,7 @@ const PolicyManager = () => {
   const fetchUserTypes = async () => {
     try {
       // Fetch existing user types from policies
-      const response = await axios.get('http://localhost:3000/api/consent/versions');
+      const response = await axios.get(`${API_BASE_URL}/api/consent/versions`);
       const existingTypes = new Set(['customer', 'employee', 'partner']);
       
       response.data.data?.forEach(policy => {
@@ -64,7 +65,7 @@ const PolicyManager = () => {
 
   const fetchPolicies = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/consent/versions');
+      const response = await axios.get(`${API_BASE_URL}/api/consent/versions`);
       // Transform data to match Policy Manager format
       const transformedData = response.data.data?.map(v => ({
         id: v.id,

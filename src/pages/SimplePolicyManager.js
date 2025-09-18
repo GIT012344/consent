@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Edit, Trash2, Eye, Copy, X } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/constants';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -32,7 +33,7 @@ const SimplePolicyManager = () => {
   const fetchPolicies = async () => {
     try {
       // Use the correct endpoint
-      const response = await axios.get('http://localhost:3000/api/simple-policy');
+      const response = await axios.get(`${API_BASE_URL}/api/simple-policy`);
       console.log('Policy response:', response.data);
       
       if (response.data && response.data.success && response.data.data) {
@@ -78,7 +79,7 @@ const SimplePolicyManager = () => {
       };
       
       const response = await axios.put(
-        `http://localhost:3000/api/simple-policy/${selectedPolicy.id}`,
+        `${API_BASE_URL}/api/simple-policy/${selectedPolicy.id}`,
         updateData
       );
       
@@ -99,7 +100,7 @@ const SimplePolicyManager = () => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:3000/api/simple-policy/${policy.id}`);
+      const response = await axios.delete(`${API_BASE_URL}/api/simple-policy/${policy.id}`);
       if (response.data.success) {
         alert('Policy deleted successfully!');
         fetchPolicies();
@@ -122,7 +123,7 @@ const SimplePolicyManager = () => {
   const togglePolicyStatus = async (policyId, currentStatus) => {
     try {
       const response = await axios.put(
-        `http://localhost:3000/api/simple-policy/${policyId}/toggle`,
+        `${API_BASE_URL}/api/simple-policy/${policyId}/toggle`,
         { is_active: !currentStatus }
       );
       if (response.data.success) {
