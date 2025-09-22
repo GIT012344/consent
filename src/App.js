@@ -87,16 +87,6 @@ const router = createBrowserRouter([
       </ProtectedAdminRoute>
     )
   },
-  {
-    path: "/admin/consent-links",
-    element: (
-      <ProtectedAdminRoute>
-        <AdminLayout>
-          <SimplePolicyManager />
-        </AdminLayout>
-      </ProtectedAdminRoute>
-    )
-  },
   // Default redirect
   { path: "*", element: <Navigate to="/" replace /> }
 ], {

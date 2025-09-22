@@ -1,18 +1,21 @@
 // API Configuration
 const API_CONFIG = {
-  // Dynamic API URL based on environment
-  BASE_URL: process.env.REACT_APP_API_URL || 
-           (process.env.NODE_ENV === 'production' 
-             ? 'https://consent-backend-3hmi.onrender.com' // Your existing backend URL
-             : 'http://localhost:3000'),
+  // Determine API base URL based on environment
+  getApiBaseUrl: () => {
+    // Always use localhost:3000 for now
+    return 'http://localhost:3000/api';
+  },
   
   // API endpoints
   ENDPOINTS: {
     // Simple Policy
-    SIMPLE_POLICY: '/api/simple-policy',
-    SIMPLE_POLICY_ACTIVE: '/api/simple-policy/active',
+    SIMPLE_POLICY: '/simple-policy',
+    SIMPLE_POLICY_ACTIVE: '/simple-policy/active',
     
     // Consent
+    CONSENT_SUBMIT: '/consent/submit',
+    CONSENT_RECORDS: '/consent/records',
+    CONSENT_ACTIVE_VERSION: '/consent/active-version',
     CONSENT_SUBMIT: '/api/consent/submit',
     CONSENT_RECORDS: '/api/consent/records',
     CONSENT_ACTIVE_VERSION: '/api/consent/active-version',

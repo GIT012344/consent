@@ -174,6 +174,7 @@ const ConsentFlowPage = () => {
 
       if (response.data && response.data.data) {
         const policyData = response.data.data;
+        console.log('Policy data from API:', policyData); // Debug log
         setPolicyContent({
           id: policyData.id,
           title: policyData.title || 'Consent Policy',
@@ -183,13 +184,11 @@ const ConsentFlowPage = () => {
         });
       } else if (response.data && response.data.success === false) {
         console.warn('No policy found:', response.data.message);
-        // Don't throw error, just show default content
+        // Don't show default content - show error instead
         setPolicyContent({
-          title: language === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy',
-          content: language === 'th' 
-            ? '<h3>นโยบายความเป็นส่วนตัว</h3><p>เรารับผิดชอบและให้ความสำคัญกับการคุ้มครองข้อมูลส่วนบุคคลของคุณ โดยนโยบายความเป็นส่วนตัวนี้จะอธิบายถึงวิธีการเก็บรวบรวม ใช้ และเปิดเผยข้อมูลของคุณ</p>' 
-            : '<h3>Privacy Policy</h3><p>We are committed to protecting your personal information. This privacy policy explains how we collect, use, and disclose your information.</p>',
-          version: '1.0'
+          title: 'ไม่พบ Policy',
+          content: '<p>ไม่พบ Policy สำหรับ ' + currentUserType + '/' + currentLang + '</p><p>กรุณาสร้าง Policy ในหน้า Admin</p>',
+          version: '0.0'
         });
       } else {
         throw new Error('No policy data received');
@@ -300,9 +299,9 @@ const ConsentFlowPage = () => {
         surname = firstName; // Use first name as surname if not provided
       }
       
-      // Accept any userType - no validation needed for future extensibility
-      let finalUserType = selectedUserType || 'customer';
-      finalUserType = finalUserType.toLowerCase().trim();
+      // Use the exact userType from URL - preserve custom types like "ไทล"
+      let finalUserType = userType || selectedUserType || 'customer';
+      // Don't convert to lowercase to preserve custom types exactly as created
       
       const payload = {
         name: firstName,
@@ -367,38 +366,6 @@ const ConsentFlowPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Admin Link */}
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => navigate('/admin/login')}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            Admin Panel
-          </button>
-        </div>
-
-        {/* Language selector - Only show for customer type */}
-        {selectedUserType === 'customer' && currentStep > 1 && (
-          <div className="flex justify-end mb-6">
-            <div className="flex items-center gap-2 bg-white rounded-lg shadow-md px-4 py-2">
-              <Globe className="w-4 h-4 text-gray-600" />
-              <div className="language-selector">
-                <button 
-                  className={`lang-btn ${language === 'th' ? 'active' : ''}`}
-                  onClick={() => setLanguage('th')}
-                >
-                  ไทย
-                </button>
-                <button 
-                  className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-                  onClick={() => setLanguage('en')}
-                >
-                  English
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         
         {/* Step 2: Personal Information */}

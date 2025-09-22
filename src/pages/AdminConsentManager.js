@@ -9,29 +9,23 @@ const AdminConsentManager = () => {
   const [filters, setFilters] = useState({
     search: '',
     userType: '',
-    status: '',
     dateFrom: '',
     dateTo: ''
   });
   const [selectedConsents, setSelectedConsents] = useState([]);
   const [showDetails, setShowDetails] = useState(null);
-  const [userTypes, setUserTypes] = useState(['customer', 'employee', 'partner']);
+  const [userTypes, setUserTypes] = useState([]);
 
   useEffect(() => {
     fetchConsents();
-    fetchUserTypes();
   }, []);
 
-  const fetchUserTypes = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/user-types`);
-      if (response.data?.success && response.data?.data) {
-        setUserTypes(response.data.data.map(ut => ut.type_name));
-      }
-    } catch (error) {
-      console.error('Error fetching user types:', error);
-    }
-  };
+  useEffect(() => {
+    // Update user types when consents change
+    const uniqueTypes = [...new Set(consents.map(c => c.user_type).filter(Boolean))];
+    setUserTypes(uniqueTypes.sort());
+  }, [consents]);
+
 
   const fetchConsents = async () => {
     try {
@@ -56,7 +50,7 @@ const AdminConsentManager = () => {
           language: record.consent_language || 'th',
           status: record.is_active !== false ? 'active' : 'inactive',
           created_at: record.created_at || record.created_date,
-          policy_title: 'Privacy Policy'
+          policy_title: record.policy_title || 'N/A' // Use actual policy_title from database
         }));
         
         console.log('Mapped records:', mappedRecords);
@@ -158,10 +152,6 @@ const AdminConsentManager = () => {
       return false;
     }
 
-    // Status filter
-    if (filters.status && consent.status !== filters.status) {
-      return false;
-    }
 
     // Date range filter
     if (filters.dateFrom) {
@@ -181,13 +171,14 @@ const AdminConsentManager = () => {
   });
 
   const exportToCSV = () => {
-    const headers = ['ID', 'Name', 'Email', 'Phone', 'User Type', 'Version', 'Language', 'Status', 'Date'];
+    const headers = ['ID', 'Name', 'Email', 'Phone', 'User Type', 'Title', 'Version', 'Language', 'Status', 'Date'];
     const rows = filteredConsents.map(c => [
       c.id,
       c.name || '',
       c.email || '',
       c.phone || '',
       c.user_type || '',
+      c.policy_title || '',
       c.consent_version || '',
       c.language || '',
       c.status || '',
@@ -224,7 +215,7 @@ const AdminConsentManager = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -241,23 +232,14 @@ const AdminConsentManager = () => {
             onChange={(e) => setFilters({ ...filters, userType: e.target.value })}
             className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All User Types</option>
+            <option value="">ประเภททั้งหมด</option>
             {userTypes.map(type => (
               <option key={type} value={type}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {type}
               </option>
             ))}
           </select>
 
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
 
           <input
             type="date"
@@ -319,8 +301,8 @@ const AdminConsentManager = () => {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อ-นามสกุล</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">เลขบัตร/Passport</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ประเภท</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">หัวข้อ</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Version</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันที่</th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จัดการ</th>
               </tr>
@@ -348,27 +330,15 @@ const AdminConsentManager = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3">
+                    <div className="text-sm font-medium text-gray-900">
+                      {consent.policy_title || 'N/A'}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="text-sm">
                       <span className="font-medium">v{consent.consent_version || '1.0'}</span>
                       <span className="text-gray-500 ml-2">({consent.language || 'th'})</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => handleToggleStatus(consent.id, consent.status)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        consent.status === 'active'
-                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                      }`}
-                    >
-                      {consent.status === 'active' ? (
-                        <CheckCircle className="w-3 h-3" />
-                      ) : (
-                        <XCircle className="w-3 h-3" />
-                      )}
-                      {consent.status || 'active'}
-                    </button>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 text-sm text-gray-500">

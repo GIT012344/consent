@@ -21,11 +21,10 @@ const AdminLayout = ({ children }) => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const menuItems = [
-    { key: 'dashboard', icon: <DashboardOutlined />, label: 'Dashboard', path: '/admin/dashboard' },
-    { key: 'consents', icon: <FileTextOutlined />, label: 'Consent Records', path: '/admin/consents' },
-    { key: 'policies', icon: <FileTextOutlined />, label: 'Policy Management', path: '/admin/policies' },
-    { key: 'create-policy', icon: <PlusOutlined />, label: 'สร้าง Policy', path: '/admin/create-policy' },
-    { key: 'consent-links', icon: <LinkOutlined />, label: 'Consent Links', path: '/admin/links' }
+    { key: 'dashboard', label: 'Dashboard', path: '/admin/dashboard', icon: <DashboardOutlined className="h-5 w-5" /> },
+    { key: 'consents', label: 'Consent Records', path: '/admin/consents', icon: <FileTextOutlined className="h-5 w-5" /> },
+    { key: 'policies', label: 'Policy Management', path: '/admin/policies', icon: <FileTextOutlined className="h-5 w-5" /> },
+    { key: 'create-policy', label: 'สร้าง Policy', path: '/admin/create-policy', icon: <PlusOutlined className="h-5 w-5" /> },
   ];
 
   const handleLogout = () => {

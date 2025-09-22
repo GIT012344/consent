@@ -142,7 +142,14 @@ const SimplePolicyManager = () => {
   };
 
   const handleCopyLink = (policy) => {
-    const langCode = policy.language === 'th-TH' ? 'th' : 'en';
+    // Fix language code mapping - handle all formats correctly
+    let langCode = 'en'; // default
+    if (policy.language === 'th-TH' || policy.language === 'th' || policy.language === 'ภาษาไทย') {
+      langCode = 'th';
+    } else if (policy.language === 'en-US' || policy.language === 'en' || policy.language === 'English') {
+      langCode = 'en';
+    }
+    
     let link = '';
     
     // Generate correct link based on user type
@@ -253,7 +260,14 @@ const SimplePolicyManager = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredPolicies.map((policy) => {
-                  const langCode = policy.language === 'th-TH' ? 'th' : 'en';
+                  // Fix language code mapping - handle all formats correctly
+                  let langCode = 'en'; // default
+                  if (policy.language === 'th-TH' || policy.language === 'th' || policy.language === 'ภาษาไทย') {
+                    langCode = 'th';
+                  } else if (policy.language === 'en-US' || policy.language === 'en' || policy.language === 'English') {
+                    langCode = 'en';
+                  }
+                  
                   let link = '';
                   let fullLink = '';
                   
@@ -276,7 +290,9 @@ const SimplePolicyManager = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        {policy.language === 'th-TH' ? '🇹🇭 ไทย' : '🇬🇧 English'}
+                        {policy.language === 'th-TH' || policy.language === 'th' ? '🇹🇭 ไทย' : 
+                         policy.language === 'en-US' || policy.language === 'en' ? '🇬🇧 English' : 
+                         policy.language}
                       </td>
                       <td className="px-4 py-3 text-sm font-mono">{policy.version}</td>
                       <td className="px-4 py-3 text-sm">{policy.title}</td>

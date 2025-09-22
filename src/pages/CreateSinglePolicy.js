@@ -39,8 +39,8 @@ const CreateSinglePolicy = () => {
   ];
 
   const languages = [
-    { value: 'th-TH', label: 'ภาษาไทย' },
-    { value: 'en-US', label: 'English' }
+    { value: 'th-TH', label: '🇹🇭 ภาษาไทย' },
+    { value: 'en-US', label: '🇬🇧 English' }
   ];
 
 
@@ -56,10 +56,22 @@ const CreateSinglePolicy = () => {
         : formData.userType;
 
       // Create simplified policy with single audience
+      // Convert language format properly: th-TH -> th, en-US -> en
+      let languageCode = formData.language;
+      console.log('Form language value:', formData.language); // Debug log
+      
+      if (formData.language === 'th-TH' || formData.language === 'ภาษาไทย') {
+        languageCode = 'th';
+      } else if (formData.language === 'en-US' || formData.language === 'English') {
+        languageCode = 'en';
+      }
+      
+      console.log('Converted language code:', languageCode); // Debug log
+      
       const policyData = {
         tenant_code: 'default',  // Use default tenant
         version: formData.version,
-        language: formData.language,
+        language: languageCode,  // Use converted language code
         user_type: actualUserType,  // Changed from userType to user_type
         title: formData.title,
         content: formData.content,
@@ -68,6 +80,8 @@ const CreateSinglePolicy = () => {
         is_mandatory: formData.is_mandatory,
         enforce_mode: formData.enforce_mode
       };
+      
+      console.log('Policy data being sent:', policyData); // Debug log
 
       const response = await axios.post(`${API_BASE_URL}/api/simple-policy`, policyData);
       
