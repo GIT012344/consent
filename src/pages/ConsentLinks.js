@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link2, Copy, Check, Globe, Users, Building, Briefcase } from 'lucide-react';
+import { Link2, Copy, Check, Globe, Users, Building, Briefcase, Settings } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/constants';
 
@@ -89,6 +89,17 @@ const ConsentLinks = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+      {/* Admin Button - Top Right */}
+      <div className="fixed top-4 right-4 z-50">
+        <a 
+          href="/admin/dashboard"
+          className="flex items-center gap-2 bg-gradient-to-r from-gray-700 to-gray-900 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+        >
+          <Settings className="w-5 h-5" />
+          <span className="font-medium">Admin</span>
+        </a>
+      </div>
+      
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">

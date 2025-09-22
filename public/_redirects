@@ -1,0 +1,5 @@
+# API Proxy - Redirect all API calls to backend
+/api/*  https://consent-backend-0wmk.onrender.com/api/:splat  200
+
+# SPA Support - Handle client-side routing
+/*  /index.html  200
