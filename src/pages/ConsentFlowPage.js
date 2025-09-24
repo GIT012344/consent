@@ -13,8 +13,8 @@ const ConsentFlowPage = () => {
   const navigate = useNavigate();
   // State management
   // Customer type should redirect to language selection page
-  // Other types go directly to form (step 2)
-  const [currentStep, setCurrentStep] = useState(2);
+  // Other types go directly to form (step 1)
+  const [currentStep, setCurrentStep] = useState(1);
   // Use URL params for language, required for all types
   const [language, setLanguage] = useState(urlLang || 'th');
   const [selectedUserType, setSelectedUserType] = useState(userType || 'customer');
@@ -167,10 +167,22 @@ const ConsentFlowPage = () => {
       // Use 'th' or 'en' for backend, not locale format
       const currentLang = language === 'th' ? 'th' : 'en';
       
-      // Get policy from simple-policy API
-      const response = await axios.get(
-        `${API_BASE_URL}/api/simple-policy/active?userType=${currentUserType}&language=${currentLang}`
-      );
+      // Get policy_id from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const policyId = urlParams.get('policy_id');
+      
+      let response;
+      if (policyId) {
+        // Get specific policy by ID
+        response = await axios.get(
+          `${API_BASE_URL}/api/simple-policy/${policyId}`
+        );
+      } else {
+        // Get active policy by userType and language (fallback)
+        response = await axios.get(
+          `${API_BASE_URL}/api/simple-policy/active?userType=${currentUserType}&language=${currentLang}`
+        );
+      }
 
       if (response.data && response.data.data) {
         const policyData = response.data.data;
@@ -267,7 +279,7 @@ const ConsentFlowPage = () => {
   // Handle next button in form step
   const handleNext = () => {
     if (validateForm()) {
-      setCurrentStep(3);
+      setCurrentStep(2);  // Go to consent policy
     }
   };
 
@@ -324,7 +336,7 @@ const ConsentFlowPage = () => {
       const response = await axios.post(`${API_BASE_URL}/api/consent/submit`, payload);
       
       if (response.data && response.data.success) {
-        setCurrentStep(4);
+        setCurrentStep(3);
         setSubmitStatus({
           type: 'success',
           message: language === 'th' ? 'บันทึกข้อมูลสำเร็จ' : 'Successfully saved'
@@ -334,11 +346,20 @@ const ConsentFlowPage = () => {
       }
     } catch (error) {
       console.error('Error submitting consent:', error);
-      setSubmitStatus({
-        type: 'error',
-        message: error.response?.data?.message || 
-                (language === 'th' ? 'เกิดข้อผิดพลาดในการบันทึกข้อมูล' : 'Error saving data')
-      });
+      
+      // Check if it's a duplicate error
+      if (error.response?.status === 400 && error.response?.data?.isDuplicate) {
+        setSubmitStatus({
+          type: 'error',
+          message: error.response.data.message
+        });
+      } else {
+        setSubmitStatus({
+          type: 'error',
+          message: error.response?.data?.message || 
+                  (language === 'th' ? 'เกิดข้อผิดพลาดในการบันทึกข้อมูล' : 'Error saving data')
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -364,12 +385,10 @@ const ConsentFlowPage = () => {
   }, [selectedUserType, language]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-
-        
-        {/* Step 2: Personal Information */}
-        {currentStep === 2 && (
+        {/* Step 1: Personal Information */}
+        {currentStep === 1 && (
           <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-lg bg-opacity-95 border border-white/20">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -381,7 +400,7 @@ const ConsentFlowPage = () => {
                 </h2>
               </div>
               <div className="text-sm text-gray-500">
-                {t[language].step} 1/3
+                {t[language].step} 1/2
               </div>
             </div>
 
@@ -453,8 +472,9 @@ const ConsentFlowPage = () => {
           </div>
         )}
         
-        {/* Step 3: Consent Policy */}
-        {currentStep === 3 && (
+
+        {/* Step 2: Consent Policy */}
+        {currentStep === 2 && (
           <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-lg bg-opacity-95 border border-white/20">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -466,7 +486,7 @@ const ConsentFlowPage = () => {
                 </h2>
               </div>
               <div className="text-sm text-gray-500">
-                {t[language].step} 3/4
+                {t[language].step} 2/2
               </div>
             </div>
 
@@ -536,7 +556,7 @@ const ConsentFlowPage = () => {
             {policyContent && (
               <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
                 <button
-                  onClick={() => setCurrentStep(2)}
+                  onClick={() => setCurrentStep(1)}
                   className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transform hover:scale-105 transition-all duration-200"
                 >
                   {t[language].back}
@@ -563,8 +583,8 @@ const ConsentFlowPage = () => {
           </div>
         )}
 
-        {/* Step 4: Success */}
-        {currentStep === 4 && (
+        {/* Step 3: Success */}
+        {currentStep === 3 && (
           <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-lg bg-opacity-95 border border-white/20">
             <div className="text-center py-8">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -587,7 +607,7 @@ const ConsentFlowPage = () => {
         )}
 
         {/* Error/Status Messages */}
-        {submitStatus && submitStatus.type === 'error' && currentStep === 3 && (
+        {submitStatus && submitStatus.type === 'error' && currentStep === 2 && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-red-600" />

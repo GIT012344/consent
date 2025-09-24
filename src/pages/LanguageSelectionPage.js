@@ -39,7 +39,7 @@ const LanguageSelectionPage = () => {
             onClick={() => handleLanguageSelect('en')}
             className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
           >
-            <div className="text-xl mb-1">🇬🇧 English</div>
+            <div className="text-xl mb-1">English</div>
             <div className="text-sm opacity-90">ภาษาอังกฤษ</div>
           </button>
         </div>

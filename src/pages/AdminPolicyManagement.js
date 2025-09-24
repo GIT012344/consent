@@ -159,7 +159,7 @@ const AdminPolicyManagement = () => {
       render: (lang) => {
         const langLabels = {
           'th-TH': '🇹🇭 ไทย',
-          'en-US': '🇬🇧 English'
+          'en-US': 'English'
         };
         return langLabels[lang] || lang;
       }
@@ -334,7 +334,7 @@ const AdminPolicyManagement = () => {
             >
               <Select placeholder="Select language">
                 <Option value="th-TH">🇹🇭 ภาษาไทย</Option>
-                <Option value="en-US">🇬🇧 English</Option>
+                <Option value="en-US">English</Option>
               </Select>
             </Form.Item>
           </div>

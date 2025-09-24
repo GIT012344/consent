@@ -9,6 +9,7 @@ const AdminConsentManager = () => {
   const [filters, setFilters] = useState({
     search: '',
     userType: '',
+    language: '',
     dateFrom: '',
     dateTo: ''
   });
@@ -152,6 +153,10 @@ const AdminConsentManager = () => {
       return false;
     }
 
+    // Language filter
+    if (filters.language && consent.language !== filters.language) {
+      return false;
+    }
 
     // Date range filter
     if (filters.dateFrom) {
@@ -215,7 +220,7 @@ const AdminConsentManager = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -240,6 +245,15 @@ const AdminConsentManager = () => {
             ))}
           </select>
 
+          <select
+            value={filters.language}
+            onChange={(e) => setFilters({ ...filters, language: e.target.value })}
+            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">ภาษาทั้งหมด</option>
+            <option value="th">ไทย</option>
+            <option value="en">English</option>
+          </select>
 
           <input
             type="date"
