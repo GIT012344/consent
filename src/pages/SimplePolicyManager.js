@@ -152,13 +152,13 @@ const SimplePolicyManager = () => {
     
     let link = '';
     
-    // Generate correct link based on user type
+    // Generate correct link based on user type - include policy_id for uniqueness
     if (policy.user_type === 'customer') {
-      // Customer goes to language selection first
-      link = `${window.location.origin}/consent/select-language`;
+      // Customer goes to language selection first with policy_id
+      link = `${window.location.origin}/consent/select-language?policy_id=${policy.id}`;
     } else {
-      // Employee and Partner go directly to form with language
-      link = `${window.location.origin}/consent/${policy.user_type}?lang=${langCode}`;
+      // Other user types go directly to form with language and policy_id
+      link = `${window.location.origin}/consent/${policy.user_type}?lang=${langCode}&policy_id=${policy.id}`;
     }
     
     navigator.clipboard.writeText(link);
@@ -176,7 +176,10 @@ const SimplePolicyManager = () => {
         !p.user_type.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
-    if (filterLanguage && p.language !== filterLanguage) return false;
+    // Simple language filter
+    if (filterLanguage && p.language !== filterLanguage) {
+      return false;
+    }
     if (filterUserType && p.user_type !== filterUserType) return false;
     return true;
   });
@@ -223,8 +226,8 @@ const SimplePolicyManager = () => {
               onChange={(e) => setFilterLanguage(e.target.value)}
             >
               <option value="">ทุกภาษา</option>
-              <option value="th-TH">ภาษาไทย</option>
-              <option value="en-US">English</option>
+              <option value="th">ภาษาไทย</option>
+              <option value="en">English</option>
             </select>
 
             <select
@@ -271,15 +274,15 @@ const SimplePolicyManager = () => {
                   let link = '';
                   let fullLink = '';
                   
-                  // Generate correct link based on user type
+                  // Generate correct link based on user type - include policy_id for uniqueness
                   if (policy.user_type === 'customer') {
-                    // Customer เลือกภาษาเองที่หน้าแรก - แสดงลิงก์เดียวกันสำหรับทุกภาษา
-                    link = `/consent/select-language`;
-                    fullLink = `${window.location.origin}/consent/select-language`;
+                    // Customer เลือกภาษาเองที่หน้าแรก - include policy_id
+                    link = `/consent/select-language?policy_id=${policy.id}`;
+                    fullLink = `${window.location.origin}/consent/select-language?policy_id=${policy.id}`;
                   } else {
-                    // UserType อื่นๆ ใช้ลิงก์ตรงพร้อมภาษา - ต้องไม่เหมือน customer
-                    link = `/consent/${policy.user_type}?lang=${langCode}`;
-                    fullLink = `${window.location.origin}/consent/${policy.user_type}?lang=${langCode}`;
+                    // UserType อื่นๆ ใช้ลิงก์ตรงพร้อมภาษาและ policy_id
+                    link = `/consent/${policy.user_type}?lang=${langCode}&policy_id=${policy.id}`;
+                    fullLink = `${window.location.origin}/consent/${policy.user_type}?lang=${langCode}&policy_id=${policy.id}`;
                   }
                   
                   return (
@@ -291,7 +294,7 @@ const SimplePolicyManager = () => {
                       </td>
                       <td className="px-4 py-3 text-sm">
                         {policy.language === 'th-TH' || policy.language === 'th' ? '🇹🇭 ไทย' : 
-                         policy.language === 'en-US' || policy.language === 'en' ? '🇬🇧 English' : 
+                         policy.language === 'en-US' || policy.language === 'en' ? 'English' : 
                          policy.language}
                       </td>
                       <td className="px-4 py-3 text-sm font-mono">{policy.version}</td>

@@ -40,7 +40,7 @@ const CreateSinglePolicy = () => {
 
   const languages = [
     { value: 'th-TH', label: '🇹🇭 ภาษาไทย' },
-    { value: 'en-US', label: '🇬🇧 English' }
+    { value: 'en-US', label: 'English' }
   ];
 
 

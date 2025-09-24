@@ -192,7 +192,7 @@ const AdminConsentLinks = () => {
                                   {policy.title}
                                 </p>
                                 <span className="text-xs bg-white px-2 py-1 rounded border">
-                                  {policy.language === 'th-TH' ? '🇹🇭 ไทย' : '🇬🇧 English'}
+                                  {policy.language === 'th-TH' ? '🇹🇭 ไทย' : 'English'}
                                 </span>
                                 <span className="text-xs text-gray-500">v{policy.version}</span>
                                 {policy.is_active && (
