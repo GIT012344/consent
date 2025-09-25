@@ -390,12 +390,18 @@ const ConsentFlowPage = () => {
         {/* Step 1: Personal Information */}
         {currentStep === 1 && (
           <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-lg bg-opacity-95 border border-white/20">
+            {/* Company Logo Header */}
+            <div className="text-center mb-8">
+              <img 
+                src="/git-logo.png" 
+                alt="Company Logo" 
+                className="w-96 h-64 mx-auto object-contain mb-4 drop-shadow-lg"
+              />
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
                   {language === 'th' ? 'ข้อมูลส่วนตัว' : 'Personal Information'}
                 </h2>
               </div>
@@ -476,12 +482,18 @@ const ConsentFlowPage = () => {
         {/* Step 2: Consent Policy */}
         {currentStep === 2 && (
           <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-lg bg-opacity-95 border border-white/20">
+            {/* Company Logo Header */}
+            <div className="text-center mb-8">
+              <img 
+                src="/git-logo.png" 
+                alt="Company Logo" 
+                className="w-96 h-64 mx-auto object-contain mb-4 drop-shadow-lg"
+              />
+            </div>
+
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-800">
                   {t[language].consentPolicy}
                 </h2>
               </div>
